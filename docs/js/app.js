@@ -1,4 +1,5 @@
 const STORAGE_KEY = 'walk-with-me-progress';
+const CACHE_NAME = 'walk-with-me-assets-v2';
 const STATIONS = [
   {
     id: 1,
@@ -60,11 +61,14 @@ const state = {
   currentStationIndex: 0,
   completed: [],
   readyForCamp: false,
-  downloadCount: 0
+  isDownloading: false,
+  downloadedCount: 0,
+  totalAssets: 0
 };
 
 const elements = {
-  beginButton: document.getElementById('beginButton'),
+  downloadButton: document.getElementById('downloadButton'),
+  beginJourneyButton: document.getElementById('beginJourneyButton'),
   walkSection: document.getElementById('walkSection'),
   stationTitle: document.getElementById('stationTitle'),
   stationStatus: document.getElementById('stationStatus'),
@@ -75,8 +79,28 @@ const elements = {
   nextButton: document.getElementById('nextButton'),
   audio: document.getElementById('stationAudio'),
   downloadStatus: document.getElementById('downloadStatus'),
-  readyBadge: document.getElementById('readyBadge')
+  readyBadge: document.getElementById('readyBadge'),
+  progressValue: document.getElementById('progressValue'),
+  downloadProgress: document.getElementById('downloadProgress')
 };
+
+function resolveAssetUrl(assetPath) {
+  return new URL(assetPath, window.location.href).href;
+}
+
+function getRequiredAssets() {
+  return [
+    resolveAssetUrl('./'),
+    resolveAssetUrl('./index.html'),
+    resolveAssetUrl('./offline.html'),
+    resolveAssetUrl('./css/styles.css'),
+    resolveAssetUrl('./js/app.js'),
+    resolveAssetUrl('./manifest.json'),
+    resolveAssetUrl('./icons/icon-192.svg'),
+    resolveAssetUrl('./icons/icon-512.svg'),
+    ...STATIONS.map((station) => resolveAssetUrl(station.audio))
+  ];
+}
 
 function loadProgress() {
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -99,6 +123,17 @@ function saveProgress() {
   }));
 }
 
+function updateReadyUI() {
+  elements.beginJourneyButton.disabled = !state.readyForCamp;
+  elements.readyBadge.hidden = !state.readyForCamp;
+  if (state.readyForCamp) {
+    elements.readyBadge.textContent = '✅ Ready for Camp';
+    elements.downloadStatus.innerHTML = 'Everything has been downloaded to this device.<br>No internet connection is required during your faith walk.';
+    elements.downloadProgress.value = 100;
+    elements.progressValue.textContent = '100%';
+  }
+}
+
 function updateProgressUI() {
   const completedCount = state.completed.length;
   elements.progressText.textContent = `${completedCount} of ${STATIONS.length} stations completed`;
@@ -117,7 +152,7 @@ function showStation(index) {
   const station = STATIONS[index];
   elements.stationTitle.textContent = station.title;
   elements.reflectionText.textContent = station.reflection;
-  elements.audio.src = station.audio;
+  elements.audio.src = resolveAssetUrl(station.audio);
   elements.audio.load();
   elements.stationStatus.textContent = state.completed.includes(station.id)
     ? 'Completed and ready to revisit.'
@@ -138,51 +173,93 @@ function goToNextStation() {
   }
 }
 
-async function cacheAudioAssets() {
-  if (!('caches' in window) || !navigator.onLine) {
-    elements.downloadStatus.textContent = 'Offline mode ready. Cached audio will be used when available.';
+async function verifyCachedAssets() {
+  if (!('caches' in window)) return false;
+  const cache = await caches.open(CACHE_NAME);
+  const assets = getRequiredAssets();
+  const cachedResults = await Promise.all(assets.map((asset) => cache.match(asset)));
+  const allCached = cachedResults.every((response) => Boolean(response));
+  if (allCached) {
+    state.readyForCamp = true;
+    saveProgress();
+  }
+  return allCached;
+}
+
+async function downloadForCamp() {
+  if (state.isDownloading) return;
+  if (!('caches' in window)) {
+    elements.downloadStatus.textContent = 'This browser cannot use Cache Storage.';
     return;
   }
 
-  const cache = await caches.open('walk-with-me-assets-v1');
-  let completed = 0;
+  state.isDownloading = true;
+  elements.downloadButton.disabled = true;
+  elements.beginJourneyButton.disabled = true;
+  elements.downloadButton.textContent = 'Downloading...';
+  elements.downloadStatus.textContent = 'Preparing your offline camp files...';
+  elements.progressValue.textContent = '0%';
+  elements.downloadProgress.value = 0;
 
-  for (const station of STATIONS) {
+  const cache = await caches.open(CACHE_NAME);
+  const assets = getRequiredAssets();
+  state.totalAssets = assets.length;
+  let completed = 0;
+  const missingAssets = [];
+
+  for (const asset of assets) {
     try {
-      const response = await fetch(station.audio, { cache: 'reload' });
+      const response = await fetch(asset, { cache: 'reload' });
       if (response.ok) {
-        await cache.put(station.audio, response.clone());
+        await cache.put(asset, response.clone());
         completed += 1;
-        state.downloadCount = completed;
-        elements.downloadStatus.textContent = `Downloading audio ${completed} of ${STATIONS.length}...`;
+        state.downloadedCount = completed;
+        const percent = Math.round((completed / assets.length) * 100);
+        elements.downloadProgress.value = percent;
+        elements.progressValue.textContent = `${percent}%`;
+        elements.downloadStatus.textContent = `Caching ${asset.split('/').pop() || 'asset'} (${completed}/${assets.length})`;
+      } else {
+        missingAssets.push(asset);
       }
     } catch (error) {
-      console.warn('Could not cache station audio.', error);
+      missingAssets.push(asset);
     }
   }
 
-  state.readyForCamp = completed === STATIONS.length;
+  state.readyForCamp = missingAssets.length === 0;
+  state.isDownloading = false;
+  elements.downloadButton.disabled = false;
+  elements.downloadButton.textContent = state.readyForCamp ? 'Download Again' : 'Try Again';
   saveProgress();
+  updateReadyUI();
+
   if (state.readyForCamp) {
-    elements.downloadStatus.textContent = 'All audio is ready.';
-    elements.readyBadge.hidden = false;
-    elements.readyBadge.textContent = 'Ready for Camp';
+    elements.downloadStatus.innerHTML = '✅ Ready for Camp<br>Everything has been downloaded to this device.<br>No internet connection is required during your faith walk.';
+    elements.downloadProgress.value = 100;
+    elements.progressValue.textContent = '100%';
   } else {
-    elements.downloadStatus.textContent = `Downloaded ${completed} of ${STATIONS.length}. Try again when online.`;
+    elements.downloadStatus.innerHTML = `Some files could not be cached. Missing assets:<br>${missingAssets.join('<br>')}`;
   }
 }
 
 async function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
   try {
-    await navigator.serviceWorker.register('./sw.js');
+    const registration = await navigator.serviceWorker.register('./sw.js');
+    await navigator.serviceWorker.ready;
+    return registration;
   } catch (error) {
     console.warn('Service worker registration failed.', error);
   }
 }
 
 function attachEvents() {
-  elements.beginButton.addEventListener('click', () => {
+  elements.downloadButton.addEventListener('click', () => {
+    downloadForCamp();
+  });
+
+  elements.beginJourneyButton.addEventListener('click', () => {
+    if (!state.readyForCamp) return;
     elements.walkSection.hidden = false;
     elements.walkSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     showStation(state.currentStationIndex);
@@ -213,15 +290,22 @@ window.addEventListener('DOMContentLoaded', async () => {
   loadProgress();
   attachEvents();
   updateProgressUI();
+  elements.beginJourneyButton.disabled = true;
+  elements.downloadProgress.value = 0;
+  elements.progressValue.textContent = '0%';
   if (state.readyForCamp) {
-    elements.downloadStatus.textContent = 'All audio is ready.';
-    elements.readyBadge.hidden = false;
-    elements.readyBadge.textContent = 'Ready for Camp';
+    updateReadyUI();
   } else {
     elements.readyBadge.hidden = true;
+    elements.downloadStatus.textContent = 'Tap download to cache all camp content for offline use.';
   }
+
   await registerServiceWorker();
-  await cacheAudioAssets();
+  const alreadyCached = await verifyCachedAssets();
+  if (alreadyCached) {
+    updateReadyUI();
+  }
+
   if (state.currentStationIndex >= 0) {
     showStation(state.currentStationIndex);
   }

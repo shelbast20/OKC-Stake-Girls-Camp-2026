@@ -11,26 +11,59 @@
     <main class="app-shell">
       <section class="card hero">
         <h1>Offline Test</h1>
-        <p class="hero-copy">This page checks whether your camp assets are available offline.</p>
+        <p class="hero-copy">This page checks whether your camp assets are cached for the mountains.</p>
         <div id="offlineStatus" class="status-card">Checking cache…</div>
-        <div id="offlineReady" class="ready-badge" hidden>You're Ready for Camp</div>
+        <div id="offlineReady" class="ready-badge" hidden>🎉 You're Ready for Camp</div>
+        <div id="offlineMissing" class="status-card" hidden></div>
       </section>
     </main>
     <script>
+      function resolveAssetUrl(assetPath) {
+        return new URL(assetPath, window.location.href).href;
+      }
+
       async function checkCache() {
         const status = document.getElementById('offlineStatus');
         const ready = document.getElementById('offlineReady');
+        const missingBox = document.getElementById('offlineMissing');
         const requiredAssets = [
-          './', './index.html', './css/styles.css', './js/app.js', './manifest.json', './icons/icon-192.svg', './icons/icon-512.svg'
+          resolveAssetUrl('./'),
+          resolveAssetUrl('./index.html'),
+          resolveAssetUrl('./offline.html'),
+          resolveAssetUrl('./css/styles.css'),
+          resolveAssetUrl('./js/app.js'),
+          resolveAssetUrl('./manifest.json'),
+          resolveAssetUrl('./icons/icon-192.svg'),
+          resolveAssetUrl('./icons/icon-512.svg'),
+          resolveAssetUrl('./assets/audio/station-1.mp3'),
+          resolveAssetUrl('./assets/audio/station-2.mp3'),
+          resolveAssetUrl('./assets/audio/station-3.mp3'),
+          resolveAssetUrl('./assets/audio/station-4.mp3'),
+          resolveAssetUrl('./assets/audio/station-5.mp3'),
+          resolveAssetUrl('./assets/audio/station-6.mp3'),
+          resolveAssetUrl('./assets/audio/station-7.mp3'),
+          resolveAssetUrl('./assets/audio/station-8.mp3'),
+          resolveAssetUrl('./assets/audio/station-9.mp3')
         ];
-        const cache = await caches.open('walk-with-me-assets-v1');
-        const results = await Promise.all(requiredAssets.map(async (asset) => {
+
+        const cache = await caches.open('walk-with-me-assets-v2');
+        const checks = await Promise.all(requiredAssets.map(async (asset) => {
           const cached = await cache.match(asset);
-          return Boolean(cached);
+          return { asset, cached: Boolean(cached) };
         }));
-        const allReady = results.every(Boolean);
-        status.textContent = allReady ? 'All required assets are cached.' : 'Some assets are still missing.';
-        ready.hidden = !allReady;
+
+        const missingAssets = checks.filter((item) => !item.cached).map((item) => item.asset);
+        if (missingAssets.length === 0) {
+          status.textContent = 'All required assets are present in the service worker cache.';
+          ready.hidden = false;
+          ready.textContent = '🎉 You\'re Ready for Camp';
+          missingBox.hidden = true;
+        } else {
+          status.textContent = 'Some assets are missing from the service worker cache.';
+          ready.hidden = true;
+          missingBox.hidden = false;
+          missingBox.innerHTML = '<strong>Missing assets</strong><br>' + missingAssets.join('<br>');
+        }
       }
 
       window.addEventListener('DOMContentLoaded', checkCache);

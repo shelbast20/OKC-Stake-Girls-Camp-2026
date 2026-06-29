@@ -24,14 +24,25 @@
         <h1 id="home-title">Walk With Me</h1>
         <p class="scripture">Moses 6:34</p>
         <p class="hero-copy">A calm, offline-first faith walk for the mountains.</p>
+
         <div class="button-row">
-          <button id="beginButton" class="button primary" type="button">Begin</button>
-          <a href="./offline.html" class="button secondary">Offline Test</a>
+          <button id="downloadButton" class="button primary" type="button">Download for Camp</button>
+          <button id="beginJourneyButton" class="button secondary" type="button" disabled>Begin Journey</button>
         </div>
+        <a href="./offline.html" class="button secondary wide">Offline Test</a>
+
+        <div class="progress-shell" aria-live="polite">
+          <div class="progress-meta">
+            <span id="progressLabel">Download status</span>
+            <span id="progressValue">0%</span>
+          </div>
+          <progress id="downloadProgress" max="100" value="0"></progress>
+        </div>
+
         <div id="downloadStatus" class="status-card" role="status" aria-live="polite">
-          Preparing your camp experience...
+          Tap download to cache all camp content for offline use.
         </div>
-        <div id="readyBadge" class="ready-badge" hidden>Ready for Camp</div>
+        <div id="readyBadge" class="ready-badge" hidden>✅ Ready for Camp</div>
       </section>
 
       <section id="walkSection" class="card walk-card" hidden>
