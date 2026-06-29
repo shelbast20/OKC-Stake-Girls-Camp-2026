@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#5f7c4c" />
+    <title>Offline Test</title>
+    <link rel="stylesheet" href="./css/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="card hero">
+        <h1>Offline Test</h1>
+        <p class="hero-copy">This page checks whether your camp assets are available offline.</p>
+        <div id="offlineStatus" class="status-card">Checking cache…</div>
+        <div id="offlineReady" class="ready-badge" hidden>You're Ready for Camp</div>
+      </section>
+    </main>
+    <script>
+      async function checkCache() {
+        const status = document.getElementById('offlineStatus');
+        const ready = document.getElementById('offlineReady');
+        const requiredAssets = [
+          './', './index.html', './css/styles.css', './js/app.js', './manifest.json', './icons/icon-192.svg', './icons/icon-512.svg'
+        ];
+        const cache = await caches.open('walk-with-me-assets-v1');
+        const results = await Promise.all(requiredAssets.map(async (asset) => {
+          const cached = await cache.match(asset);
+          return Boolean(cached);
+        }));
+        const allReady = results.every(Boolean);
+        status.textContent = allReady ? 'All required assets are cached.' : 'Some assets are still missing.';
+        ready.hidden = !allReady;
+      }
+
+      window.addEventListener('DOMContentLoaded', checkCache);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,89 @@
+:root {
+  color-scheme: light;
+  --bg: #f5efe7;
+  --bg-accent: #e4ddcf;
+  --panel: rgba(255, 255, 255, 0.9);
+  --text: #24311f;
+  --muted: #5f6f56;
+  --primary: #4f6b3e;
+  --primary-dark: #264229;
+  --accent: #8aa76f;
+  --border: rgba(36, 49, 31, 0.16);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg-accent) 100%);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+button, a.button { font: inherit; }
+
+.app-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow: 0 14px 40px rgba(31, 43, 27, 0.08);
+  padding: 1.2rem;
+}
+
+.hero { text-align: center; }
+.logo-wrap { display: flex; justify-content: center; margin-bottom: 0.8rem; }
+.logo { width: 120px; height: 120px; border-radius: 28px; }
+.eyebrow { text-transform: uppercase; letter-spacing: 0.24em; font-size: 0.8rem; color: var(--muted); margin: 0 0 0.4rem; }
+h1, h2, h3 { margin: 0 0 0.5rem; }
+h1 { font-size: 2rem; }
+.scripture { font-weight: 700; color: var(--primary-dark); margin: 0.25rem 0 0; }
+.hero-copy { color: var(--muted); line-height: 1.6; }
+.button-row, .button-stack { display: grid; gap: 0.75rem; margin-top: 1rem; }
+.button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  border-radius: 999px;
+  padding: 1rem 1.25rem;
+  text-decoration: none;
+  font-weight: 700;
+  min-height: 56px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.button:active { transform: scale(0.98); }
+.button.primary { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(79, 107, 62, 0.25); }
+.button.secondary { background: rgba(138, 167, 111, 0.16); color: var(--primary-dark); }
+.button.large { min-height: 64px; font-size: 1.05rem; }
+.status-card, .reflection-card, .progress-card { background: rgba(255,255,255,0.72); border-radius: 18px; padding: 0.95rem; margin-top: 1rem; }
+.ready-badge {
+  display: inline-flex;
+  margin-top: 1rem;
+  padding: 0.7rem 1rem;
+  border-radius: 999px;
+  background: var(--primary);
+  color: white;
+  font-weight: 700;
+}
+.walk-card { display: grid; gap: 0.8rem; }
+.station-status { color: var(--muted); }
+.completed-list { list-style: none; padding: 0; margin: 0.4rem 0 0; display: grid; gap: 0.35rem; }
+.completed-list li { background: rgba(138, 167, 111, 0.16); border-radius: 999px; padding: 0.45rem 0.7rem; color: var(--primary-dark); }
+
+@media (min-width: 700px) {
+  .app-shell { padding: 2rem; }
+  .button-row { grid-template-columns: 1fr 1fr; }
+  .button-stack { grid-template-columns: 1fr 1fr; }
+  .hero { padding: 2rem; }
+}
