@@ -1,4 +1,4 @@
-const CACHE_NAME = 'walk-with-me-assets-v2';
+const CACHE_NAME = 'walk-with-me-assets-v3';
 const APP_SHELL = [
   new URL('./', self.location.href).href,
   new URL('./index.html', self.location.href).href,
