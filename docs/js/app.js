@@ -99,8 +99,8 @@ function getRequiredAssets() {
     resolveAssetUrl('./css/styles.css'),
     resolveAssetUrl('./js/app.js'),
     resolveAssetUrl('./manifest.json'),
-    resolveAssetUrl('./icons/icon-192.svg'),
-    resolveAssetUrl('./icons/icon-512.svg'),
+    resolveAssetUrl('./icons/icon-192.png'),
+    resolveAssetUrl('./icons/icon-512.png'),
     ...STATIONS.map((station) => resolveAssetUrl(station.audio))
   ];
 }
