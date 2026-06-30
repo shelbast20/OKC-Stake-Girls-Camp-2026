@@ -3,55 +3,55 @@ const CACHE_NAME = 'walk-with-me-assets-v2';
 const STATIONS = [
   {
     id: 1,
-    title: 'Station One: Welcome',
+    title: 'Station 1',
     audio: './assets/audio/station-1.mp3',
     reflection: 'Begin with calm, steady breaths. Let this moment feel holy and simple.'
   },
   {
     id: 2,
-    title: 'Station Two: Stillness',
+    title: 'Station 2',
     audio: './assets/audio/station-2.mp3',
     reflection: 'Listen for a quiet voice and let it settle your heart.'
   },
   {
     id: 3,
-    title: 'Station Three: Gratitude',
+    title: 'Station 3',
     audio: './assets/audio/station-3.mp3',
     reflection: 'Name one blessing and carry it with you.'
   },
   {
     id: 4,
-    title: 'Station Four: Courage',
+    title: 'Station 4',
     audio: './assets/audio/station-4.mp3',
     reflection: 'Remember that peace can stand alongside courage.'
   },
   {
     id: 5,
-    title: 'Station Five: Trust',
+    title: 'Station 5',
     audio: './assets/audio/station-5.mp3',
     reflection: 'Trust the path, even when it is not fully visible.'
   },
   {
     id: 6,
-    title: 'Station Six: Hope',
+    title: 'Station 6',
     audio: './assets/audio/station-6.mp3',
     reflection: 'Let hope grow gently inside you as you walk.'
   },
   {
     id: 7,
-    title: 'Station Seven: Service',
+    title: 'Station 7',
     audio: './assets/audio/station-7.mp3',
     reflection: 'Think of someone you can love and serve today.'
   },
   {
     id: 8,
-    title: 'Station Eight: Light',
+    title: 'Station 8',
     audio: './assets/audio/station-8.mp3',
     reflection: 'Carry light into the places that feel dim.'
   },
   {
     id: 9,
-    title: 'Station Nine: Promise',
+    title: 'Station 9',
     audio: './assets/audio/station-9.mp3',
     reflection: 'Close with gratitude and a sense of peace.'
   }
