@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#5f7c4c" />
+    <meta name="theme-color" content="#1f4d6b" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="Walk With Me" />
@@ -16,14 +16,13 @@
   </head>
   <body>
     <main class="app-shell">
-      <section class="hero card" aria-labelledby="home-title">
+      <section id="homeSection" class="hero card" aria-labelledby="home-title">
         <div class="logo-wrap" aria-hidden="true">
-          <img src="./icons/icon-512.svg" alt="" class="logo" />
+          <img src="./assets/images/logo.png" alt="" class="logo" />
         </div>
         <p class="eyebrow">OKC Girls Camp 2026</p>
         <h1 id="home-title">Walk With Me</h1>
         <p class="scripture">Moses 6:34</p>
-        <p class="hero-copy">A calm, offline-first faith walk for the mountains.</p>
 
         <div class="button-row">
           <button id="downloadButton" class="button primary" type="button">Download for Camp</button>
@@ -46,28 +45,18 @@
       </section>
 
       <section id="walkSection" class="card walk-card" hidden>
+        <button id="homeButton" class="button secondary home-button" type="button">Home</button>
         <div class="walk-header">
           <p class="eyebrow">Station</p>
           <h2 id="stationTitle">Station 1</h2>
-          <p id="stationStatus" class="station-status">Tap play to begin.</p>
         </div>
 
         <audio id="stationAudio" preload="auto" playsinline></audio>
 
         <div class="button-stack">
           <button id="playButton" class="button primary large" type="button">Play</button>
+          <button id="previousButton" class="button secondary large" type="button" hidden>Previous Station</button>
           <button id="nextButton" class="button secondary large" type="button">Next Station</button>
-        </div>
-
-        <div class="reflection-card">
-          <h3>Reflection</h3>
-          <p id="reflectionText">Take a breath and listen for peace.</p>
-        </div>
-
-        <div class="progress-card">
-          <h3>Your progress</h3>
-          <p id="progressText">0 of 9 stations completed</p>
-          <ul id="completedList" class="completed-list"></ul>
         </div>
       </section>
     </main>

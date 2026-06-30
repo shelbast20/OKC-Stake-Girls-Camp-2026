@@ -69,13 +69,16 @@ const state = {
 const elements = {
   downloadButton: document.getElementById('downloadButton'),
   beginJourneyButton: document.getElementById('beginJourneyButton'),
+  homeSection: document.getElementById('homeSection'),
   walkSection: document.getElementById('walkSection'),
+  homeButton: document.getElementById('homeButton'),
   stationTitle: document.getElementById('stationTitle'),
   stationStatus: document.getElementById('stationStatus'),
   reflectionText: document.getElementById('reflectionText'),
   progressText: document.getElementById('progressText'),
   completedList: document.getElementById('completedList'),
   playButton: document.getElementById('playButton'),
+  previousButton: document.getElementById('previousButton'),
   nextButton: document.getElementById('nextButton'),
   audio: document.getElementById('stationAudio'),
   downloadStatus: document.getElementById('downloadStatus'),
@@ -136,28 +139,46 @@ function updateReadyUI() {
 
 function updateProgressUI() {
   const completedCount = state.completed.length;
-  elements.progressText.textContent = `${completedCount} of ${STATIONS.length} stations completed`;
-  elements.completedList.innerHTML = '';
-  state.completed.forEach((stationId) => {
-    const station = STATIONS.find((item) => item.id === stationId);
-    if (!station) return;
-    const item = document.createElement('li');
-    item.textContent = station.title;
-    elements.completedList.appendChild(item);
-  });
+  if (elements.progressText) {
+    elements.progressText.textContent = `${completedCount} of ${STATIONS.length} stations completed`;
+  }
+
+  if (elements.completedList) {
+    elements.completedList.innerHTML = '';
+    state.completed.forEach((stationId) => {
+      const station = STATIONS.find((item) => item.id === stationId);
+      if (!station) return;
+      const item = document.createElement('li');
+      item.textContent = station.title;
+      elements.completedList.appendChild(item);
+    });
+  }
 }
 
 function showStation(index) {
   if (index < 0 || index >= STATIONS.length) return;
   const station = STATIONS[index];
-  elements.stationTitle.textContent = station.title;
-  elements.reflectionText.textContent = station.reflection;
-  elements.audio.src = resolveAssetUrl(station.audio);
-  elements.audio.load();
-  elements.stationStatus.textContent = state.completed.includes(station.id)
-    ? 'Completed and ready to revisit.'
-    : 'Tap play to begin.';
-  elements.playButton.textContent = 'Play';
+  if (elements.stationTitle) {
+    elements.stationTitle.textContent = station.title;
+  }
+  if (elements.reflectionText) {
+    elements.reflectionText.textContent = station.reflection;
+  }
+  if (elements.audio) {
+    elements.audio.src = resolveAssetUrl(station.audio);
+    elements.audio.load();
+  }
+  if (elements.stationStatus) {
+    elements.stationStatus.textContent = state.completed.includes(station.id)
+      ? 'Completed and ready to revisit.'
+      : 'Tap play to begin.';
+  }
+  if (elements.playButton) {
+    elements.playButton.textContent = 'Play';
+  }
+  if (elements.previousButton) {
+    elements.previousButton.hidden = index <= 0;
+  }
   updateProgressUI();
 }
 
@@ -171,6 +192,23 @@ function goToNextStation() {
     saveProgress();
     elements.stationStatus.textContent = 'You completed the full walk.';
   }
+}
+
+function goToPreviousStation() {
+  if (state.currentStationIndex > 0) {
+    state.currentStationIndex -= 1;
+    saveProgress();
+    showStation(state.currentStationIndex);
+  }
+}
+
+function showHomeScreen() {
+  elements.walkSection.hidden = true;
+  elements.homeSection.hidden = false;
+  if (!elements.audio.paused) {
+    elements.audio.pause();
+  }
+  elements.homeSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 async function verifyCachedAssets() {
@@ -260,9 +298,14 @@ function attachEvents() {
 
   elements.beginJourneyButton.addEventListener('click', () => {
     if (!state.readyForCamp) return;
+    elements.homeSection.hidden = true;
     elements.walkSection.hidden = false;
     elements.walkSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     showStation(state.currentStationIndex);
+  });
+
+  elements.homeButton.addEventListener('click', () => {
+    showHomeScreen();
   });
 
   elements.playButton.addEventListener('click', async () => {
@@ -273,6 +316,10 @@ function attachEvents() {
     } catch (error) {
       elements.stationStatus.textContent = 'Tap again to start audio.';
     }
+  });
+
+  elements.previousButton.addEventListener('click', () => {
+    goToPreviousStation();
   });
 
   elements.nextButton.addEventListener('click', () => {
